@@ -8,8 +8,16 @@ def lcm_naive(a, b):
 
     return a*b
 
+def gcd(a, b):
+    if b == 0:
+        return a
+    aPrime = a % b
+    return gcd(b, aPrime)
+
+def lcm_fast(a,b):
+    return (a * b) // gcd(a,b)
+
 if __name__ == '__main__':
-    input = sys.stdin.read()
-    a, b = map(int, input.split())
-    print(lcm_naive(a, b))
+    a, b = map(int, input().split())
+    print(lcm_fast(a, b))
 
