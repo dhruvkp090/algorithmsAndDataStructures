@@ -3,8 +3,22 @@ import sys
 import random
 
 def partition3(a, l, r):
-    #write your code here
-    pass
+    x = a[l]
+    lt = l
+    gt = r
+    i = l
+    while i <= gt:
+        if a[i] < x:
+            a[i], a[lt] = a[lt], a[i]
+            lt += 1
+            i += 1
+        elif a[i] > x:
+            a[i], a[gt] = a[gt], a[i]
+            gt -= 1
+        else:
+            i += 1
+    return lt, gt
+
 
 def partition2(a, l, r):
     x = a[l]
@@ -23,9 +37,9 @@ def randomized_quick_sort(a, l, r):
     k = random.randint(l, r)
     a[l], a[k] = a[k], a[l]
     #use partition3
-    m = partition2(a, l, r)
-    randomized_quick_sort(a, l, m - 1);
-    randomized_quick_sort(a, m + 1, r);
+    m1, m2 = partition3(a, l, r)
+    randomized_quick_sort(a, l, m1 - 1);
+    randomized_quick_sort(a, m2 + 1, r);
 
 
 if __name__ == '__main__':
