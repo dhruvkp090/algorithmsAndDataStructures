@@ -1,41 +1,61 @@
-# python3
+import sys
 
 
-class Database:
-    def __init__(self, row_counts):
-        self.row_counts = row_counts
-        self.max_row_count = max(row_counts)
-        n_tables = len(row_counts)
-        self.ranks = [1] * n_tables
-        self.parents = list(range(n_tables))
+class DisjointSet(object):
+        def __init__(self,n,lines):
+            self.n = n
+            self.lines = [0] + lines
+            self.rank = [0] * (n + 1)
+            self.parent = list(range(0, n + 1))
+            self.max = max(self.lines)
 
-    def merge(self, src, dst):
-        src_parent = self.get_parent(src)
-        dst_parent = self.get_parent(dst)
+        def get_parent(self, x):
+            """Finds a set id (root of the tree) for element x and compresses path."""
+            parents_to_update = []
 
-        if src_parent == dst_parent:
-            return False
+            # Find root.
+            root = x
+            while root != self.parent[root]:
+                parents_to_update.append(self.parent[root])
+                root = self.parent[root]
 
-        # merge two components
-        # use union by rank heuristic
-        # update max_row_count with the new maximum table size
-        return True
+            # Compress path.
+            for i in parents_to_update:
+                self.parent[i] = root
 
-    def get_parent(self, table):
-        # find parent and compress path
-        return self.parents[table]
+            return root
 
+        def merge(self, dest, src):
+            """Unions tables. During union updates rank's(tree's height) array."""
+            src_root = self.get_parent(src)
+            dest_root = self.get_parent(dest)
 
-def main():
-    n_tables, n_queries = map(int, input().split())
-    counts = list(map(int, input().split()))
-    assert len(counts) == n_tables
-    db = Database(counts)
-    for i in range(n_queries):
-        dst, src = map(int, input().split())
-        db.merge(dst - 1, src - 1)
-        print(db.max_row_count)
+            # Means the sets have been merged already.
+            if src_root == dest_root:
+                return
+
+            if self.rank[src_root] >= self.rank[dest_root]:
+                self.parent[src_root] = dest_root
+            else:
+                self.parent[dest_root] = src_root
+                if self.rank[src_root] == self.rank[dest_root]:
+                    self.rank[src_root] += 1
+
+            self.lines[dest_root] += self.lines[src_root]
+            self.lines[src_root] = 0
+
+            if self.max < self.lines[dest_root]:
+                self.max = self.lines[dest_root]
+
+        def get_max_lines(self):
+            return self.max
 
 
 if __name__ == "__main__":
-    main()
+    n, m = map(int, sys.stdin.readline().split())
+    lines = list(map(int, sys.stdin.readline().split()))
+    ds = DisjointSet(n, lines)
+    for i in range(m):
+        destination, source = map(int, sys.stdin.readline().split())
+        ds.merge(destination, source)
+        print(ds.get_max_lines())

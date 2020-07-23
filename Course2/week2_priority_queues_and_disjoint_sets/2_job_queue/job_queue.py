@@ -3,17 +3,56 @@
 from collections import namedtuple
 
 AssignedJob = namedtuple("AssignedJob", ["worker", "started_at"])
+worker = namedtuple("worker", ["workerID", "freeTime"])
+
+def leftChild(a):
+    return (2*(a+1) - 1)
+
+def rightChild(a):
+    return (2*(a+1))
+
+def shiftDown(data, a):
+    size = len(data)
+    minInd = a
+    L = leftChild(a)
+    if L < size and data[L].freeTime < data[minInd].freeTime:
+        minInd = L
+    elif L < size and data[L].workerID < data[minInd].workerID:
+        if data[L].freeTime == data[minInd].freeTime:
+            minInd = L
+    R = rightChild(a)
+    if R < size and data[R].freeTime < data[minInd].freeTime:
+        minInd = R
+    elif R < size and data[R].workerID < data[minInd].workerID:
+        if data[R].freeTime == data[minInd].freeTime:
+            minInd = R
+    if a != minInd:
+        temp = data[a]
+        data[a] = data[minInd]
+        data[minInd] = temp
+        shiftDown(data, minInd)
+    return data
+
+
+# def build_heap(data):
+#     """Build a heap from ``data`` inplace.
+
+#     Returns a sequence of swaps performed by the algorithm.
+#     """
+#     size = len(data)
+#     for i in range(size//2, -1,-1):
+#         shiftDown(data, i)
+#     return data
 
 
 def assign_jobs(n_workers, jobs):
-    # TODO: replace this code with a faster algorithm.
     result = []
-    next_free_time = [0] * n_workers
-    for job in jobs:
-        next_worker = min(range(n_workers), key=lambda w: next_free_time[w])
-        result.append(AssignedJob(next_worker, next_free_time[next_worker]))
-        next_free_time[next_worker] += job
-
+    allWorkers = [worker(i, 0) for i in range(n_workers)]
+    # allWorksrs = build_heap(allWorkers)
+    for j in jobs:
+        result.append(AssignedJob(allWorkers[0].workerID, allWorkers[0].freeTime))
+        allWorkers[0] = worker(allWorkers[0].workerID, allWorkers[0].freeTime + j)
+        allWorkers = shiftDown(allWorkers, 0)
     return result
 
 
@@ -23,7 +62,6 @@ def main():
     assert len(jobs) == n_jobs
 
     assigned_jobs = assign_jobs(n_workers, jobs)
-
     for job in assigned_jobs:
         print(job.worker, job.started_at)
 
